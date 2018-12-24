@@ -7,35 +7,73 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/urfave/cli"
 )
 
 func main() {
 
-	var currentFileCount int
-	var destinationFilename string
+	//var currentFileCount int
+	//var destinationFilename string
 
-	files, err := filepath.Glob("*")
+	app := cli.NewApp()
+	app.Name = "gf-rename"
+	app.Usage = "Global file rename"
+
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "input, i",
+			Value: "",
+			Usage: "Input mask.",
+		},
+		cli.StringFlag{
+			Name:  "output, o",
+			Value: "",
+			Usage: "Output mask.",
+		},
+	}
+
+	app.Action = func(c *cli.Context) error {
+
+		var currentFileCount int
+
+		fmt.Println("Args = ", len(os.Args))
+
+		files, err := filepath.Glob("*")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, currentFile := range files {
+
+			currentFileCount = processFile(currentFile, currentFileCount)
+
+			fmt.Println(currentFile)
+		}
+
+		return nil
+	}
+
+	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
-	for _, currentFile := range files {
+func processFile(currentFile string, currentFileCount int) int {
 
-		if currentFile != "main" && IsFileOrDirectory(currentFile) == "f" {
-			currentFileCount++
+	if currentFile != "main" && IsFileOrDirectory(currentFile) == "f" {
+		currentFileCount++
 
-			//fmt.Printf("\n**\n\n")
+		destinationFilename := makeDestinationFilename(currentFile, currentFileCount, "n")
 
-			//fmt.Println(currentFile)
-			//fmt.Println(extractFileExtension)
+		fmt.Println("destinationFilename = " + destinationFilename)
 
-			destinationFilename = makeDestinationFilename(currentFile, currentFileCount, "n")
+		copyFile(currentFile, destinationFilename)
 
-			fmt.Println("destinationFilename = " + destinationFilename)
-
-			copyFile(currentFile, destinationFilename)
-		}
 	}
+	return currentFileCount
+
 }
 
 func extractFileExtension(fileName string) string {
@@ -46,9 +84,7 @@ func extractFileExtension(fileName string) string {
 		if fileName[i-1:i] == "." {
 			return fileName[i-1 : len(fileName)]
 		}
-
 	}
-
 	return ""
 }
 
