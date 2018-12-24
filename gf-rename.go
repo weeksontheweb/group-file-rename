@@ -62,7 +62,7 @@ func main() {
 
 func processFile(currentFile string, currentFileCount int) int {
 
-	if currentFile != "main" && IsFileOrDirectory(currentFile) == "f" {
+	if currentFile != "gf-rename" && IsFileOrDirectory(currentFile) == "f" {
 		currentFileCount++
 
 		destinationFilename := makeDestinationFilename(currentFile, currentFileCount, "n")
